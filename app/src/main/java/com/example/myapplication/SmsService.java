@@ -5,7 +5,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -13,6 +12,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -30,6 +30,8 @@ public class SmsService extends Service {
     private int retryCount = 0;
     public static final String ACTION_SEND_MESSAGE = "com.example.myapplication.SEND_MESSAGE";
 
+    public static final String SMS_SERVICE_CHANNEL = "SmsServiceChannel";
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -39,13 +41,12 @@ public class SmsService extends Service {
                 .build();
         apiService = retrofit.create(ApiService.class);
 
-//        createNotificationChannel();
         createNotification();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Notification notification = new Notification.Builder(this, "SmsServiceChannel")
+        Notification notification = new Notification.Builder(this, SMS_SERVICE_CHANNEL)
                 .setContentTitle("SMS Forwarding Service")
                 .setContentText("Running in background")
                 .setSmallIcon(R.drawable.pc_notification)
@@ -56,36 +57,35 @@ public class SmsService extends Service {
             String message = intent.getStringExtra("message");
             String sender = intent.getStringExtra("sender");
             String time = intent.getStringExtra("time");
+            // Send the SMS data to the server
             sendMessageToServer(message, sender, time);
+
+            // Send a broadcast with the SMS data to main activity to view the SMS text and sender in textviews
+            Intent broadcastIntent = new Intent(ACTION_SEND_MESSAGE);
+            broadcastIntent.putExtra("message", message);
+            broadcastIntent.putExtra("sender", sender);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         } else {
             Log.d("SmsForwardingService", "Service started without SMS data");
         }
 
-//        String message = intent.getStringExtra("message");
-//        String sender = intent.getStringExtra("sender");
-//        String time = intent.getStringExtra("time");
-//        sendMessageToServer(message, sender, time);
-
-        // Starting the service as a foreground service
-//        startForeground(1, createNotification());
-
         return START_STICKY;
     }
 
-    private Notification createNotification() {
-        NotificationChannel channel = new NotificationChannel("SmsServiceChannel", "Sms Service Channel", NotificationManager.IMPORTANCE_HIGH);
+    private void createNotification() {
+        NotificationChannel channel = new NotificationChannel(SMS_SERVICE_CHANNEL, "Sms Service Channel", NotificationManager.IMPORTANCE_HIGH);
         NotificationManager manager = getSystemService(NotificationManager.class);
         if (manager != null) {
             manager.createNotificationChannel(channel);
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "SmsServiceChannel")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SMS_SERVICE_CHANNEL)
                 .setContentTitle("SMS Service")
                 .setContentText("Running...")
                 .setSmallIcon(R.drawable.pc_notification)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        return builder.build();
+        builder.build();
     }
 
     private void sendMessageToServer(String message, String sender, String time) {
