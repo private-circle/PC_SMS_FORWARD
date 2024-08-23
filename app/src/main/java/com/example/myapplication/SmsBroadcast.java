@@ -59,7 +59,16 @@
 
         public static boolean validateMessage(String message) {
             // Create a case-insensitive regex pattern to check both "OTP" and at least one of "INR 100.00" or "INR 50.00"
-            Pattern pattern = Pattern.compile("(?i)(?=.*\\bOTP\\b)(?=.*\\b(?:INR 100\\.00|INR 50\\.00)\\b)");
+            // Pattern pattern = Pattern.compile("(?i)(?=.*\\bOTP\\b)(?=.*\\b(?:INR 100\\.00|INR 50\\.00)\\b)");
+            // Create a case-insensitive regex pattern to check both "OTP" and "ICICI" along with at-least at least one of "INR 100.00" or "INR 50.00"
+            Pattern pattern = Pattern.compile("(?i)(?=.*\\bOTP\\b)(?=.*\\bICICI\\b)(?=.*\\b(?:INR 100\\.00|INR 50\\.00)\\b)");
+
+//            This pattern ensures that:
+//
+//            (?i)                                      :makes the regex case-insensitive.
+//            (?=.*\\bOTP\\b)                           :ensures "OTP" is present.
+//            (?=.*\\bICICI\\b)                         :ensures "ICICI" is present.
+//            (?=.*\\b(?:INR 100\\.00|INR 50\\.00)\\b)  :ensures that either "INR 100.00" or "INR 50.00" is present.
 
             // Match the pattern against the message
             Matcher matcher = pattern.matcher(message);
