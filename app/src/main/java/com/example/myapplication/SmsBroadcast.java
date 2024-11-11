@@ -97,14 +97,14 @@
          * @return true if the message meets the validation criteria, false otherwise.
          */
         public static boolean validateMessage(String message) {
-            // Create a case-insensitive regex pattern to check for "OTP" and "ICICI"
-            // along with at least one of "INR 100.00" or "INR 50.00"
-            Pattern pattern = Pattern.compile("(?i)(?=.*\\bOTP\\b)(?=.*\\bICICI\\b)(?=.*\\b(?:INR 100\\.00|INR 50\\.00)\\b)");
+            // Create a case-insensitive regex pattern to check for "OTP" , at least "ICICI" or "Volopay"
+            // along with at least one of "INR 101.18" or "INR 50.59"
+            Pattern pattern = Pattern.compile("(?i)(?=.*\\bOTP\\b)(?=.*\\b(?:ICICI|Volopay)\\b)(?=.*\\b(?:INR 101\\.18|INR 50\\.59)\\b)");
 
             // Match the pattern against the message
             Matcher matcher = pattern.matcher(message);
 
-            // Return true if both "OTP", "ICICI" and at least one of "INR 100.00" or "INR 50.00" are found
+            // Return true if both "OTP", "ICICI" or "Volopay" and at least one of "INR 101.18" or "INR 50.59" are found
             return matcher.find();
         }
     }
